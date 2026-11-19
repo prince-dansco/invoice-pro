@@ -1,6 +1,6 @@
 # InvoicePro MVP: implementation report
 
-Status as of 18 November 2026. Covers all spec phases, 1 to 7, including the optional phase 6 (email).
+Status as of 19 November 2026. Live at https://invoice-pro-eight-mu.vercel.app. Covers all spec phases, 1 to 7, including the optional phase 6 (email).
 
 ## What works
 
@@ -46,11 +46,11 @@ The PDFs were checked by extracting their text and page sizes. They haven't been
 
 ## Not done or not verified
 
-- **Deployment (IP-252):** not deployed. It needs the code pushed to GitHub and a Vercel project; the steps are in the README.
-- **CI:** the workflow exists but hasn't run, because nothing has been pushed yet.
+- **Deployment (IP-252):** deployed to Vercel on 19 November from `main` (github.com/prince-dansco/invoice-pro). `pnpm verify:pages` passes against the live site, including PDFs with logos. Vercel blocked Next.js 15.5.4 for known vulnerabilities, so Next.js, React and sharp were upgraded to patched releases. sharp then failed to load on Vercel, so WebP logos are now converted to PNG in the browser and the server no longer needs it.
+- **CI:** GitHub Actions runs lint, typecheck, unit tests and build on every push, and has passed on every commit so far.
 - **Password reset (IP-122):** tested with a real inbox on 18 November. A reset link now always opens "Choose a new password", even if Supabase sends it to the Site URL because the redirect URL isn't on its allow list.
 - **Still needs a person:** a real Google sign-in once a Google OAuth client is configured (IP-123), and opening a downloaded PDF to check it looks right.
-- **Supabase dashboard settings** (README, step 4): redirect URLs, the two email templates, and optionally Google.
+- **Supabase dashboard settings** (README, step 4): the Site URL and Redirect URLs must include the live address. The two email templates need custom SMTP first; Google is optional.
 
 ## Known limitations
 
