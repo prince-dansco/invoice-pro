@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "2mb" },
   },
   // The PDF renderer and image converter load native code and font files at runtime.
-  serverExternalPackages: ["@react-pdf/renderer", "sharp"],
+  serverExternalPackages: ["@react-pdf/renderer"],
   // Ship the PDF fonts with the PDF route when deployed.
   outputFileTracingIncludes: {
     "/invoices/[id]/pdf": ["./src/assets/fonts/**"],

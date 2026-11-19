@@ -34,7 +34,7 @@ export async function uploadLogo(_prev: FormState, formData: FormData): Promise<
 
   const bytes = new Uint8Array(await file.arrayBuffer());
   const kind = sniffImage(bytes);
-  if (!kind) return { error: "Use a PNG, JPG or WebP image." };
+  if (!kind) return { error: "Use a PNG or JPG image." };
 
   const supabase = await createClient();
   // A new name each time, so cached copies of the old logo are never shown.

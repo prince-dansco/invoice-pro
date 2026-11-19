@@ -82,11 +82,11 @@ try {
   const lockedEdit = await get(`/invoices/${long.saved_id}/edit`);
   check("issued invoice's edit page redirects to its view page", lockedEdit.status === 307 && lockedEdit.location?.endsWith(`/invoices/${long.saved_id}`), `${lockedEdit.status} ${lockedEdit.location}`);
 
-  // A WebP logo, which the PDF route has to convert to PNG before embedding.
+  // A PNG logo. (WebP is converted to PNG in the browser before upload, so only PNG and JPEG reach storage.)
   const sharp = (await import("sharp")).default;
-  const webp = await sharp({ create: { width: 240, height: 80, channels: 4, background: "#24408e" } }).webp().toBuffer();
-  const logoPath = `${u.user.id}/logo-check.webp`;
-  const up = await c.storage.from("logos").upload(logoPath, webp, { contentType: "image/webp" });
+  const png = await sharp({ create: { width: 240, height: 80, channels: 4, background: "#24408e" } }).png().toBuffer();
+  const logoPath = `${u.user.id}/logo-check.png`;
+  const up = await c.storage.from("logos").upload(logoPath, png, { contentType: "image/png" });
   await c.from("profiles").update({ logo_path: logoPath }).eq("id", u.user.id);
   check("test logo uploaded", !up.error, up.error?.message);
 
@@ -116,7 +116,7 @@ try {
   const landing = await fetch(base + "/").then((r) => r.text());
   check("landing page renders for visitors", landing.includes("Create your first invoice") && landing.includes("Example invoice") && landing.includes("Sign in"));
 } finally {
-  await admin.storage.from("logos").remove([`${u.user.id}/logo-check.webp`]);
+  await admin.storage.from("logos").remove([`${u.user.id}/logo-check.png`]);
   await admin.auth.admin.deleteUser(u.user.id);
 }
 console.log(failures ? `\n${failures} failed` : "\nAll page checks passed.");

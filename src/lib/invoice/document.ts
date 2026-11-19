@@ -80,17 +80,11 @@ export async function loadInvoiceDocument(id: string) {
   return { invoice, items, status, data, logoPath: profile.logo_path };
 }
 
-/** The logo's bytes for embedding in a PDF, converted to PNG when needed. */
+/** The logo's bytes for embedding in a PDF. Only PNG and JPEG are uploaded (see lib/logo.ts). */
 export async function loadLogoForPdf(logoPath: string | null): Promise<Buffer | null> {
-  if (!logoPath) return null;
+  if (!logoPath || !/\.(png|jpe?g)$/i.test(logoPath)) return null;
   const supabase = await createClient();
   const { data } = await supabase.storage.from("logos").download(logoPath);
   if (!data) return null;
-  const bytes = Buffer.from(await data.arrayBuffer());
-  // The PDF renderer supports PNG and JPEG only.
-  if (logoPath.endsWith(".webp")) {
-    const sharp = (await import("sharp")).default;
-    return sharp(bytes).png().toBuffer();
-  }
-  return bytes;
+  return Buffer.from(await data.arrayBuffer());
 }

@@ -9,11 +9,11 @@ Status as of 18 November 2026. Covers all spec phases, 1 to 7, including the opt
 | Foundation | Next.js 15 App Router, strict TypeScript, Tailwind v4, shadcn/ui, app shell with desktop sidebar and mobile menu |
 | Database | 7 migrations: profiles, clients, invoices, items; RLS on every table; composite `(id, user_id)` foreign keys; atomic invoice numbering; logo storage; transactional `save_invoice`; status functions and edit-lock triggers |
 | Auth | Email/password sign-up with confirmation, sign-in, password reset, optional Google sign-in (button appears when enabled), route protection, onboarding |
-| Business profile | All §7 fields, logo upload (PNG/JPG/WebP, 1 MB, checked by content), currency, terms, numbering, tax defaults |
+| Business profile | All §7 fields, logo upload (PNG/JPG, plus WebP converted to PNG in the browser; 1 MB, checked by content), currency, terms, numbering, tax defaults |
 | Clients | List with search, create/edit with shared client + server validation, soft delete, inline creation from the editor |
 | Calculations | Integer minor units, half-up rounding, discount before tax, recalculated on the server; browser totals ignored |
 | Invoice editor | Header, line items, discounts, tax, notes; draft saving; live preview; responsive layout; unsaved-changes warning; Ctrl+S |
-| PDF | A4/US Letter, embedded Noto Sans (₦ renders), logo (WebP converted), repeated table header, page numbers, `INV-001-Client-Name.pdf` |
+| PDF | A4/US Letter, embedded Noto Sans (₦ renders), logo, repeated table header, page numbers, `INV-001-Client-Name.pdf` |
 | Statuses | Draft → Sent → Paid, derived Overdue (Lagos time), reopen as draft (keeps number), mark unpaid; issued invoices frozen in the database |
 | Dashboard | Outstanding, overdue, paid, total invoiced, sent and draft counts from real data, per currency; overdue and recent lists; getting-started checklist |
 | Invoice list | Search by number or client, status filter including Overdue, sortable columns |

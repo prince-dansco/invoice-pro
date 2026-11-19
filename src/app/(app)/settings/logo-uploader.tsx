@@ -12,6 +12,22 @@ import type { FormState } from "@/lib/validation/form-state";
 import { removeLogo, uploadLogo } from "./actions";
 
 const ACCEPT = "image/png,image/jpeg,image/webp";
+/** Longest side of a converted logo. Far more than a printed invoice needs. */
+const MAX_SIDE = 1200;
+
+/** Re-encodes a WebP image as PNG, scaling it down if it's very large. */
+async function webpToPng(file: File): Promise<File> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+  if (!blob) throw new Error("PNG encoding failed");
+  return new File([blob], file.name.replace(/\.webp$/i, "") + ".png", { type: "image/png" });
+}
 
 export function LogoUploader({ logoUrl }: { logoUrl: string | null }) {
   const [state, action, uploading] = useActionState<FormState, FormData>(uploadLogo, {});
@@ -23,11 +39,20 @@ export function LogoUploader({ logoUrl }: { logoUrl: string | null }) {
     if (state.success) toast.success(state.success);
   }, [state]);
 
-  function onFileChosen(file: File | undefined) {
+  async function onFileChosen(input: HTMLInputElement) {
     setClientError(null);
+    let file = input.files?.[0];
     if (!file) return;
     // Quick checks for fast feedback; the server checks the file contents again.
     if (!ACCEPT.split(",").includes(file.type)) return setClientError("Use a PNG, JPG or WebP image.");
+    if (file.type === "image/webp") {
+      // PDFs can only embed PNG and JPEG, so WebP is converted here, in the browser.
+      file = await webpToPng(file).catch(() => undefined);
+      if (!file) return setClientError("We couldn't read that WebP image. Try a PNG or JPG instead.");
+      const transfer = new DataTransfer();
+      transfer.items.add(file);
+      input.files = transfer.files;
+    }
     if (file.size > LOGO_MAX_BYTES) return setClientError("That image is over 1 MB. Choose a smaller one.");
     formRef.current?.requestSubmit();
   }
@@ -62,7 +87,7 @@ export function LogoUploader({ logoUrl }: { logoUrl: string | null }) {
               accept={ACCEPT}
               className="peer sr-only"
               disabled={busy}
-              onChange={(ev) => onFileChosen(ev.target.files?.[0])}
+              onChange={(ev) => void onFileChosen(ev.target)}
             />
             <span className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 text-sm font-medium transition-colors hover:bg-muted peer-focus-visible:ring-3 peer-focus-visible:ring-ring/50 peer-disabled:pointer-events-none peer-disabled:opacity-50">
               {uploading ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Upload className="size-4" aria-hidden />}
